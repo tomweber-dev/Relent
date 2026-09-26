@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0d0d0d" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="apple-mobile-web-app-title" content="Relent" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <meta name="description" content="Relent — privilégier l'inconfort à la médiocrité." />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23121212'/%3E%3Cpath d='M16 48 32 14l16 34h-8l-8-18-8 18z' fill='%23f4f4f0'/%3E%3C/svg%3E" />
+  <title>Relent — Anti-complaisance</title>
+  <style>
+    :root { color-scheme: dark; --bg: #121212; --panel: #1a1a1a; --line: #303030; --text: #f4f4f0; --muted: #92928c; --accent: #e9e9e2; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    main { width: min(100% - 2rem, 680px); margin: 0 auto; padding: 10vh 0 4rem; }
+    header { position: relative; margin-bottom: 4rem; padding-right: 3.5rem; }
+    .settings-button { position: absolute; top: 0; right: 0; width: 2.5rem; height: 2.5rem; margin: 0; padding: 0; border-color: var(--line); background: transparent; color: var(--text); font-size: 1.15rem; }
+    .install-button { display: none; position: absolute; top: 3.05rem; right: 0; margin: 0; padding: .42rem .55rem; border-color: var(--line); background: transparent; color: var(--muted); font-size: .68rem; font-weight: 700; letter-spacing: .04em; }
+    .install-button.visible { display: block; }
+    .eyebrow { color: var(--muted); font-size: .72rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+    h1 { max-width: 11ch; margin: .7rem 0 0; font-size: clamp(2.3rem, 7vw, 4.5rem); font-weight: 500; letter-spacing: -.065em; line-height: .96; }
+    .step { display: none; }
+    .step.active { display: block; animation: enter .28s ease-out; }
+    @keyframes enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .step-number { color: var(--muted); font-size: .75rem; font-weight: 700; letter-spacing: .12em; }
+    h2 { margin: .65rem 0 1.7rem; font-size: clamp(1.45rem, 4vw, 2rem); font-weight: 500; letter-spacing: -.04em; line-height: 1.15; }
+    textarea { display: block; width: 100%; min-height: 132px; resize: vertical; padding: 1rem; border: 1px solid var(--line); border-radius: 2px; outline: none; background: var(--panel); color: var(--text); font: inherit; font-size: 1rem; line-height: 1.55; }
+    textarea:focus { border-color: var(--text); }
+    textarea::placeholder { color: #6f6f6a; }
+    button { margin-top: 1rem; padding: .9rem 1.15rem; border: 1px solid var(--accent); border-radius: 2px; background: var(--accent); color: #121212; cursor: pointer; font: inherit; font-size: .92rem; font-weight: 750; }
+    button:hover { background: #fff; }
+    button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+    button.secondary { background: transparent; color: var(--text); border-color: var(--line); }
+    .error { min-height: 1.25rem; margin: .6rem 0 0; color: #ef9089; font-size: .85rem; }
+    .challenge, .validation { border-left: 2px solid var(--text); padding: .15rem 0 .15rem 1.2rem; }
+    .challenge-label { margin: 0 0 .7rem; color: var(--muted); font-size: .72rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
+    .challenge p, .validation p { margin: 0; font-size: clamp(1.1rem, 3vw, 1.35rem); line-height: 1.45; }
+    .context { margin: 1.25rem 0 0; color: var(--muted); font-size: .9rem; }
+    .counter { margin: 2.5rem 0 0; padding-top: 1.2rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
+    .counter strong { color: var(--text); font-size: 1.3rem; font-weight: 600; }
+    .victory-total { margin: 2.5rem 0 0; padding-top: 1.4rem; border-top: 1px solid var(--line); }
+    .victory-total strong { display: block; font-size: clamp(3.4rem, 14vw, 6rem); font-weight: 500; letter-spacing: -.08em; line-height: .8; }
+    .victory-total span { display: block; margin-top: .8rem; color: var(--muted); font-size: .85rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .session-summary { margin-top: 2rem; padding: 1.1rem; border: 1px solid var(--line); background: var(--panel); }
+    .session-summary p { margin: 0; font-size: .93rem; line-height: 1.5; }
+    .session-summary p + p { margin-top: 1rem; }
+    .session-summary strong { display: block; margin-bottom: .25rem; color: var(--muted); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; }
+    .slogan { margin: 2rem 0 0; color: var(--muted); font-size: .84rem; font-weight: 700; letter-spacing: .05em; }
+    .registry { margin-top: 2.5rem; padding-top: 1.2rem; border-top: 1px solid var(--line); }
+    .registry summary { cursor: pointer; color: var(--text); font-size: .9rem; font-weight: 700; }
+    .registry time { display: inline; margin: 0; color: var(--muted); font-size: .8rem; }
+    .registry-controls { display: flex; justify-content: flex-end; margin: 1rem 0; }
+    .registry-controls button { margin: 0; padding: .5rem .65rem; color: var(--muted); font-size: .75rem; }
+    .history { margin-top: 4.5rem; padding-top: 1.2rem; border-top: 1px solid var(--line); }
+    .history h2 { margin: 0 0 1.2rem; font-size: 1rem; letter-spacing: 0; }
+    .history ol { display: grid; gap: .7rem; margin: 0; padding: 0; list-style: none; }
+    .history li { padding: .9rem 1rem; border: 1px solid var(--line); background: var(--panel); font-size: .9rem; line-height: 1.45; }
+    .history time { display: block; margin-bottom: .3rem; color: var(--muted); font-size: .72rem; }
+    .empty { color: var(--muted); font-size: .9rem; }
+    .loading { display: none; margin: 1rem 0 0; color: var(--muted); font-size: .9rem; font-weight: 600; }
+    .loading.visible { display: block; }
+    .api-feedback { min-height: 1.25rem; margin: 1rem 0 0; color: #ef9089; font-size: .9rem; line-height: 1.4; }
+    .modal { position: fixed; inset: 0; z-index: 10; display: none; place-items: center; padding: 1rem; background: rgb(0 0 0 / .72); }
+    .modal.open { display: grid; }
+    .modal-card { width: min(100%, 410px); padding: 1.5rem; border: 1px solid var(--line); background: var(--panel); box-shadow: 0 16px 50px rgb(0 0 0 / .5); }
+    .modal-card h2 { margin: 0 0 .45rem; font-size: 1.35rem; }
+    .modal-card p { margin: 0 0 1.25rem; color: var(--muted); font-size: .85rem; line-height: 1.45; }
+    label { display: block; margin: 1rem 0 .45rem; color: var(--muted); font-size: .75rem; font-weight: 700; letter-spacing: .1em; }
+    select, input { width: 100%; padding: .8rem; border: 1px solid var(--line); border-radius: 2px; background: #121212; color: var(--text); font: inherit; }
+    .modal-actions { display: flex; gap: .7rem; justify-content: flex-end; margin-top: 1.25rem; }
+    .modal-actions button { margin: 0; }
+    @media (max-width: 520px) { main { padding-top: 4rem; } header { margin-bottom: 3rem; } button { width: 100%; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="eyebrow">RELENT / PROTOCOLE 01</div>
+      <h1>Privilégier l’inconfort à la médiocrité.</h1>
+      <button type="button" class="install-button" id="install-button">Installer l’application</button>
+      <button type="button" class="settings-button" id="settings-button" aria-label="Configurer Groq Cloud">⚙</button>
+    </header>
+
+    <section id="step-1" class="step active" aria-labelledby="title-1">
+      <div class="step-number">ÉTAPE 01 / 04</div>
+      <h2 id="title-1">Quelle facilité ou flemme te tente là, tout de suite&nbsp;?</h2>
+      <textarea id="temptation" maxlength="500" placeholder="Ex. Reporter ce dossier et faire défiler mon téléphone…"></textarea>
+      <p id="temptation-error" class="error" role="alert"></p>
+      <button type="button" id="face-button">Affronter l’inconfort</button>
+      <p id="challenge-loading" class="loading" role="status">L’IA tranche...</p>
+    </section>
+
+    <section id="step-2" class="step" aria-labelledby="title-2">
+      <div class="step-number">ÉTAPE 02 / 04</div>
+      <h2 id="title-2">Le défi est simple. L’excuse ne l’est pas.</h2>
+      <article class="challenge" aria-live="polite">
+        <div class="challenge-label">RÉPONSE DE L’IA</div>
+        <p id="challenge-text"></p>
+      </article>
+      <p id="temptation-context" class="context"></p>
+      <button type="button" id="completed-button">J’ai relevé le défi</button>
+    </section>
+
+    <section id="step-3" class="step" aria-labelledby="title-3">
+      <div class="step-number">ÉTAPE 03 / 04</div>
+      <h2 id="title-3">Prouve-le sans te raconter d’histoire.</h2>
+      <textarea id="proof" maxlength="800" placeholder="Décris précisément l’action réalisée et comment tu as repris le contrôle de tes émotions :"></textarea>
+      <p id="proof-error" class="error" role="alert"></p>
+      <button type="button" id="submit-button">Soumettre la preuve</button>
+      <p id="proof-loading" class="loading" role="status">L’IA tranche...</p>
+      <p id="validation-feedback" class="api-feedback" role="alert"></p>
+    </section>
+
+    <section id="step-4" class="step" aria-labelledby="title-4">
+      <div class="step-number">ÉTAPE 04 / 04</div>
+      <h2 id="title-4">Validation.</h2>
+      <article class="validation"><p>Bien. Tu as choisi la discipline. Prochaine étape.</p></article>
+      <div class="victory-total"><strong id="victory-count">0</strong><span>Victoires contre la médiocrité</span></div>
+      <div class="session-summary" aria-label="Récapitulatif de la session">
+        <p><strong>Tentation surmontée</strong><span id="victory-temptation"></span></p>
+        <p><strong>Premier geste exécuté</strong><span id="victory-proof"></span></p>
+      </div>
+      <p class="slogan">Privilégier l’inconfort à la médiocrité.</p>
+      <button type="button" id="new-button">Retour au combat</button>
+      <details class="registry" id="registry">
+        <summary>Registre des combats</summary>
+        <div class="registry-controls"><button type="button" class="secondary" id="clear-history">Effacer le registre</button></div>
+        <ol id="history-list"></ol>
+      </details>
+    </section>
+  </main>
+
+  <div class="modal" id="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <div class="modal-card">
+      <h2 id="settings-title">Configuration Groq</h2>
+      <p>Colle la clé générée sur console.groq.com. Elle reste enregistrée uniquement dans ce navigateur.</p>
+      <label for="provider">FOURNISSEUR</label>
+      <select id="provider" disabled><option value="groq">Groq Cloud</option></select>
+      <label for="api-key">CLÉ API GROQ</label>
+      <input id="api-key" type="password" autocomplete="off" placeholder="gsk_..." />
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="close-settings">Annuler</button>
+        <button type="button" id="save-settings">Sauvegarder</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const historyStorageKey = 'relent_history';
+    const victoryCountStorageKey = 'relent_victories_count';
+    const apiKeyStorageKey = 'relent-groq-api-key';
+    const systemPrompt = `Tu es l'IA de l'application Relent (« Privilégier l'inconfort à la médiocrité »).
+Ton rôle est de stopper la flemme immédiatement avec sévérité et concision.
+Règles :
+- Maximum 2 phrases courtes.
+- Tutoiement obligatoire.
+- Phrase 1 : Rejet direct et incisif de la flemme ou de la tentation.
+- Phrase 2 : Donne un ordre d'action MINIME, exécutable en moins de 2 minutes, par exemple : « Ouvre ton fichier et écris la première ligne » ou « Enfile tes baskets et sors ».
+- Pas de grands objectifs complexes, vise uniquement le démarrage.`;
+    const temptation = document.querySelector('#temptation');
+    const proof = document.querySelector('#proof');
+    const faceButton = document.querySelector('#face-button');
+    const submitButton = document.querySelector('#submit-button');
+    let currentTemptation = '';
+    let currentChallenge = '';
+
+    function getHistory() {
+      try { return JSON.parse(localStorage.getItem(historyStorageKey)) || []; }
+      catch { return []; }
+    }
+    function getVictoryCount() {
+      const count = Number.parseInt(localStorage.getItem(victoryCountStorageKey), 10);
+      return Number.isFinite(count) && count >= 0 ? count : 0;
+    }
+    function recordVictory(proofText) {
+      const history = getHistory();
+      const now = new Date();
+      const entry = {
+        date: new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).format(now),
+        timestamp: now.toISOString(),
+        temptation: currentTemptation,
+        proof: proofText
+      };
+      history.unshift(entry);
+      localStorage.setItem(historyStorageKey, JSON.stringify(history));
+
+      const total = getVictoryCount() + 1;
+      localStorage.setItem(victoryCountStorageKey, String(total));
+      return total;
+    }
+    function renderVictory(total, proofText) {
+      document.querySelector('#victory-count').textContent = total;
+      document.querySelector('#victory-temptation').textContent = currentTemptation;
+      document.querySelector('#victory-proof').textContent = proofText;
+    }
+    function setStep(number) {
+      document.querySelectorAll('.step').forEach((step, index) => step.classList.toggle('active', index === number - 1));
+      const activeTitle = document.querySelector(`#step-${number} h2`);
+      activeTitle?.focus?.();
+    }
+    function getApiKey() {
+      return localStorage.getItem(apiKeyStorageKey) || '';
+    }
+    function setLoading(id, isLoading) {
+      document.querySelector(id).classList.toggle('visible', isLoading);
+    }
+    async function callGroq(input, instructions = systemPrompt) {
+      const apiKey = getApiKey();
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+        body: JSON.stringify({
+          model: 'openai/gpt-oss-120b',
+          messages: [
+            { role: 'system', content: instructions },
+            { role: 'user', content: input }
+          ],
+          temperature: 0.5,
+          max_tokens: 400
+        })
+      });
+
+      const rawResponse = await response.text();
+      let data;
+
+      try {
+        data = JSON.parse(rawResponse);
+      } catch {
+        throw new Error(`HTTP ${response.status} ${response.statusText} — réponse non JSON : ${rawResponse.slice(0, 300) || 'vide'}`);
+      }
+
+      console.log('Réponse Groq :', data);
+
+      if (!response.ok) {
+        const providerMessage = data.error?.message || data.message || rawResponse;
+        throw new Error(`HTTP ${response.status} ${response.statusText} — ${providerMessage}`);
+      }
+
+      const message = data.choices && data.choices[0] && data.choices[0].message;
+      let responseText = '';
+
+      if (message) {
+        if (typeof message.content === 'string' && message.content.trim() !== '') {
+          responseText = message.content.trim();
+        } else if (typeof message.reasoning === 'string' && message.reasoning.trim() !== '') {
+          responseText = message.reasoning.trim();
+        } else if (typeof message.reasoning_content === 'string' && message.reasoning_content.trim() !== '') {
+          responseText = message.reasoning_content.trim();
+        } else if (Array.isArray(message.content)) {
+          responseText = message.content.map(part => part.text || part.content || '').join('').trim();
+        }
+      }
+
+      if (!responseText) {
+        throw new Error(`HTTP ${response.status} — réponse sans contenu. JSON reçu : ${JSON.stringify(data).slice(0, 500)}`);
+      }
+
+      return responseText;
+    }
+    function renderHistory() {
+      const victories = getHistory();
+      const list = document.querySelector('#history-list');
+      list.replaceChildren();
+      if (!victories.length) {
+        const empty = document.createElement('li');
+        empty.className = 'empty';
+        empty.textContent = 'Aucune victoire enregistrée. Commence sans attendre.';
+        list.append(empty);
+        return;
+      }
+      victories.slice(0, 8).forEach(victory => {
+        const item = document.createElement('li');
+        const date = document.createElement('time');
+        date.dateTime = victory.timestamp || '';
+        date.textContent = `${victory.date || 'Date inconnue'} — `;
+        const content = document.createElement('span');
+        content.textContent = `Tentation : « ${victory.temptation} » | Action : « ${victory.proof} »`;
+        item.append(date, content);
+        list.append(item);
+      });
+    }
+
+    document.querySelector('#face-button').addEventListener('click', async () => {
+      currentTemptation = temptation.value.trim();
+      const error = document.querySelector('#temptation-error');
+      if (!currentTemptation) { error.textContent = 'Nomme précisément la facilité que tu veux éviter.'; temptation.focus(); return; }
+      if (!getApiKey()) {
+        document.querySelector('#settings-modal').classList.add('open');
+        document.querySelector('#api-key').focus();
+        return;
+      }
+      error.textContent = '';
+      faceButton.disabled = true;
+      setLoading('#challenge-loading', true);
+      try {
+        currentChallenge = await callGroq(`Tentation de l’utilisateur : ${currentTemptation}`);
+        document.querySelector('#challenge-text').textContent = currentChallenge;
+        document.querySelector('#temptation-context').textContent = `Tentation déclarée : « ${currentTemptation} »`;
+        setStep(2);
+      } catch (requestError) {
+        error.textContent = `Impossible de joindre l’IA : ${requestError.message}`;
+      } finally {
+        faceButton.disabled = false;
+        setLoading('#challenge-loading', false);
+      }
+    });
+    document.querySelector('#completed-button').addEventListener('click', () => setStep(3));
+    document.querySelector('#submit-button').addEventListener('click', async () => {
+      const proofText = proof.value.trim();
+      const error = document.querySelector('#proof-error');
+      const feedback = document.querySelector('#validation-feedback');
+      if (proofText.length < 12) { error.textContent = 'La preuve doit contenir des faits précis, pas une formule.'; proof.focus(); return; }
+      error.textContent = '';
+      feedback.textContent = '';
+      submitButton.disabled = true;
+      setLoading('#proof-loading', true);
+      const validationPrompt = `Défi initial de 2 minutes : « ${currentChallenge} ».
+Preuve saisie : « ${proofText} ». `;
+      try {
+        const result = await callGroq(validationPrompt, `Tu es le contrôleur de l'application Relent. Ton rôle unique à cette étape est de VÉRIFIER si l'utilisateur a accompli son premier geste de 2 minutes.
+
+Règles de décision :
+1. L'utilisateur te soumet ce qu'il vient de faire.
+2. Si sa réponse montre une action concrète, même minime, par exemple « j'ai ouvert mon fichier », « j'ai écrit un titre » ou « j'ai rangé mon bureau », tu DOIS répondre « Accepté » suivi d'une courte phrase d'encouragement stoïcien.
+3. Ne lui demande PAS de faire l'action : il l'a DÉJÀ faite. Tu constates juste le fait.
+4. Refuse UNIQUEMENT si le texte est une moquerie, une excuse ou du vide, par exemple « je le ferai après », « lol » ou « j'ai pas envie ».
+
+Format strict de réponse :
+- Si valide : « Accepté. L'élan est pris, continue sur ta lancée. »
+- Si invalide : « Refusé. Tu n'as rien fait. Fais le geste de 2 minutes et indique-le ici. »
+Réponds uniquement avec l'un de ces deux formats, sans ajouter de texte.`);
+        if (!/^Accepté\./i.test(result)) {
+          feedback.textContent = result || 'Refusé. Fais le premier geste de 2 minutes maintenant.';
+          return;
+        }
+        document.querySelector('.validation p').textContent = result || 'Accepté. L’élan est pris, continue.';
+        const total = recordVictory(proofText);
+        renderVictory(total, proofText);
+        renderHistory();
+        setStep(4);
+      } catch (requestError) {
+        feedback.textContent = `Impossible de joindre l’IA : ${requestError.message}`;
+      } finally {
+        submitButton.disabled = false;
+        setLoading('#proof-loading', false);
+      }
+    });
+    document.querySelector('#new-button').addEventListener('click', () => {
+      temptation.value = ''; proof.value = ''; currentTemptation = ''; currentChallenge = '';
+      document.querySelector('#temptation-error').textContent = '';
+      document.querySelector('#proof-error').textContent = '';
+      document.querySelector('#validation-feedback').textContent = '';
+      setStep(1); temptation.focus();
+    });
+    const settingsModal = document.querySelector('#settings-modal');
+    const apiKeyInput = document.querySelector('#api-key');
+    document.querySelector('#settings-button').addEventListener('click', () => {
+      apiKeyInput.value = getApiKey();
+      settingsModal.classList.add('open');
+      apiKeyInput.focus();
+    });
+    document.querySelector('#close-settings').addEventListener('click', () => settingsModal.classList.remove('open'));
+    document.querySelector('#save-settings').addEventListener('click', () => {
+      const apiKey = apiKeyInput.value.trim();
+      if (!apiKey) { apiKeyInput.focus(); return; }
+      localStorage.setItem(apiKeyStorageKey, apiKey);
+      settingsModal.classList.remove('open');
+    });
+    settingsModal.addEventListener('click', event => {
+      if (event.target === settingsModal) settingsModal.classList.remove('open');
+    });
+    document.querySelector('#clear-history').addEventListener('click', () => {
+      if (!confirm('Effacer définitivement le registre des combats ?')) return;
+      localStorage.removeItem(historyStorageKey);
+      renderHistory();
+    });
+
+    let deferredInstallPrompt;
+    const installButton = document.querySelector('#install-button');
+    window.addEventListener('beforeinstallprompt', event => {
+      event.preventDefault();
+      deferredInstallPrompt = event;
+      installButton.classList.add('visible');
+    });
+    installButton.addEventListener('click', async () => {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      installButton.classList.remove('visible');
+    });
+    window.addEventListener('appinstalled', () => installButton.classList.remove('visible'));
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(error => console.warn('Service worker non enregistré :', error));
+    }
+    renderHistory();
+    document.querySelector('#victory-count').textContent = getVictoryCount();
+  </script>
+</body>
+</html>
